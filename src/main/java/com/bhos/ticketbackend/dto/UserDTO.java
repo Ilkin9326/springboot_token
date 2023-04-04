@@ -1,4 +1,4 @@
-package com.bhos.ticketbackend.user;
+package com.bhos.ticketbackend.dto;
 
 import lombok.*;
 
@@ -12,4 +12,5 @@ public class UserDTO {
     private String firstname;
     private String lastname;
     private String email;
+
 }

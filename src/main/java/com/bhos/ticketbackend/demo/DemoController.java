@@ -1,16 +1,21 @@
 package com.bhos.ticketbackend.demo;
 
 import com.bhos.ticketbackend.auth.AuthenticationService;
+import com.bhos.ticketbackend.dto.UserDTO;
 import com.bhos.ticketbackend.user.User;
-import com.bhos.ticketbackend.user.UserDTO;
+import com.bhos.ticketbackend.user.UserRowMapper;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.security.Principal;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -19,15 +24,26 @@ import java.util.List;
 public class DemoController {
 
     private final AuthenticationService service;
+    private final JdbcTemplate jdbcTemplate;
     private Logger logger = LoggerFactory.getLogger(this.getClass());
+
     @GetMapping
-    public ResponseEntity<String> sayHello() {
-        return ResponseEntity.ok("Hello from secured endpoint");
+    public ResponseEntity<String> sayHello(Principal principal) {
+        return ResponseEntity.ok("Hello from secured endpoint" + principal.getName());
     }
 
     @GetMapping("/users")
-    public ResponseEntity<List<User>> getUsers() {
-        return ResponseEntity.ok(service.getAllUsers());
+    public ResponseEntity<List<UserDTO>> getUsers() {
+        List<UserDTO> listDTo = null;
+        try {
+            String sql = "select u.id, u.firstname, u.lastname, u.email from user u";
+            listDTo = jdbcTemplate.query(sql, new UserRowMapper());
+        }catch (EmptyResultDataAccessException exception){
+            exception.printStackTrace();
+            logger.info(exception.getMessage());
+        }
+
+        return ResponseEntity.ok(listDTo);
     }
 
 }
