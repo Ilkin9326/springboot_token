@@ -1,6 +1,7 @@
 package com.bhos.ticketbackend.demo;
 
 import com.bhos.ticketbackend.auth.AuthenticationService;
+import com.bhos.ticketbackend.dto.ResponseDTO;
 import com.bhos.ticketbackend.dto.UserDTO;
 import com.bhos.ticketbackend.user.User;
 import com.bhos.ticketbackend.user.UserRowMapper;
@@ -33,7 +34,7 @@ public class DemoController {
     }
 
     @GetMapping("/users")
-    public ResponseEntity<List<UserDTO>> getUsers() {
+    public ResponseEntity<ResponseDTO> getUsers() {
         List<UserDTO> listDTo = null;
         try {
             String sql = "select u.id, u.firstname, u.lastname, u.email from user u";
@@ -43,7 +44,7 @@ public class DemoController {
             logger.info(exception.getMessage());
         }
 
-        return ResponseEntity.ok(listDTo);
+        return ResponseEntity.ok(ResponseDTO.of(listDTo, "Success response"));
     }
 
 }
