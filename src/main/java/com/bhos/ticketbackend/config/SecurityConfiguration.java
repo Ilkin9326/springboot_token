@@ -27,12 +27,11 @@ public class SecurityConfiguration {
         http
                 .csrf()
                 .disable()
-                .authorizeHttpRequests()
-                .requestMatchers("/api/v1/auth/**")
-                .permitAll()
-                .anyRequest()
-                .authenticated()
-                .and()
+                .authorizeHttpRequests((authorizationManagerRequest) -> authorizationManagerRequest
+                            .requestMatchers("/api/v1/auth/**").permitAll()
+                            .requestMatchers("/api/v1/demo-controller/users").hasAuthority("ADMIN")
+                            .anyRequest().authenticated()
+                )
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()

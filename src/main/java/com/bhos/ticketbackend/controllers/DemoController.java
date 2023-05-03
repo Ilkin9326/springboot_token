@@ -1,9 +1,8 @@
-package com.bhos.ticketbackend.demo;
+package com.bhos.ticketbackend.controllers;
 
 import com.bhos.ticketbackend.auth.AuthenticationService;
 import com.bhos.ticketbackend.dto.ResponseDTO;
 import com.bhos.ticketbackend.dto.UserDTO;
-import com.bhos.ticketbackend.user.User;
 import com.bhos.ticketbackend.user.UserRowMapper;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -16,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.security.Principal;
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -30,14 +28,14 @@ public class DemoController {
 
     @GetMapping
     public ResponseEntity<String> sayHello(Principal principal) {
-        return ResponseEntity.ok("Hello from secured endpoint" + principal.getName());
+        return ResponseEntity.ok("Hello from secured endpoint " + principal.getName());
     }
 
     @GetMapping("/users")
     public ResponseEntity<ResponseDTO> getUsers() {
         List<UserDTO> listDTo = null;
         try {
-            String sql = "select u.id, u.firstname, u.lastname, u.email from user u";
+            String sql = "select u.id, u.firstname, u.lastname, u.email, u.role from user u";
             listDTo = jdbcTemplate.query(sql, new UserRowMapper());
         }catch (EmptyResultDataAccessException exception){
             exception.printStackTrace();

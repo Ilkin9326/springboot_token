@@ -1,5 +1,6 @@
 package com.bhos.ticketbackend.dto;
 
+import com.bhos.ticketbackend.user.Role;
 import lombok.*;
 
 @Getter
@@ -12,5 +13,7 @@ public class UserDTO {
     private String firstname;
     private String lastname;
     private String email;
+
+    private Role role;
 
 }

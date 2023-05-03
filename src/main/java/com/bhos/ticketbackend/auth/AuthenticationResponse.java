@@ -1,5 +1,6 @@
 package com.bhos.ticketbackend.auth;
 
+import com.bhos.ticketbackend.dto.UserDTO;
 import com.bhos.ticketbackend.user.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,6 +13,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class AuthenticationResponse {
 
-    private User user;
+    private UserDTO user;
     private String token;
 }
