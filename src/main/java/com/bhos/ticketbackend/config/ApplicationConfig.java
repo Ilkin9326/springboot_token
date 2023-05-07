@@ -1,6 +1,6 @@
 package com.bhos.ticketbackend.config;
 
-import com.bhos.ticketbackend.user.UserRepository;
+import com.bhos.ticketbackend.user.EmployeeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,7 +17,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @RequiredArgsConstructor
 public class ApplicationConfig {
 
-    private final UserRepository repository;
+    private final EmployeeRepository repository;
 
     @Bean
     public UserDetailsService userDetailsService() {

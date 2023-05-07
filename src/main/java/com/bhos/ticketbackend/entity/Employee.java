@@ -1,6 +1,10 @@
-package com.bhos.ticketbackend.user;
+package com.bhos.ticketbackend.entity;
 
+import com.bhos.ticketbackend.user.Role;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,18 +21,24 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "user")
-public class User implements UserDetails {
+@Table(name = "employee")
+public class Employee implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
-    private String firstname;
-    private String lastname;
+    private Integer emp_id;
+    private String first_name;
+    private String last_name;
+    private String username;
+
     private String email;
     private String password;
 
+    private int status;//Iscinin akademik veya inzibati oldugunu saxlayir
+
+
     @Enumerated(EnumType.STRING)
     private Role role;
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -64,4 +74,5 @@ public class User implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
+
 }

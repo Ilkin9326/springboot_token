@@ -2,54 +2,59 @@ package com.bhos.ticketbackend.auth;
 
 
 import com.bhos.ticketbackend.config.JwtService;
+import com.bhos.ticketbackend.dto.ResponseDTO;
 import com.bhos.ticketbackend.token.Token;
 import com.bhos.ticketbackend.token.TokenRepository;
 import com.bhos.ticketbackend.token.TokenType;
-import com.bhos.ticketbackend.user.Role;
-import com.bhos.ticketbackend.user.User;
-import com.bhos.ticketbackend.dto.UserDTO;
-import com.bhos.ticketbackend.user.UserRepository;
+import com.bhos.ticketbackend.entity.Employee;
+import com.bhos.ticketbackend.dto.EmployeeDTO;
+import com.bhos.ticketbackend.user.EmployeeRepository;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.NonUniqueResultException;
+import org.hibernate.exception.ConstraintViolationException;
+import org.postgresql.util.PSQLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.dao.DataAccessException;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.security.Principal;
-import java.util.List;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 
 @Service
 @RequiredArgsConstructor
 public class AuthenticationService {
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
-    private final UserRepository repository;
+    private final EmployeeRepository repository;
     private final TokenRepository tokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
 
 
-    public AuthenticationResponse register(RegisterRequest request) {
-        var user = User.builder()
-                .firstname(request.getFirstname())
-                .lastname(request.getLastname())
+    public ResponseDTO register(RegisterRequest request) {
+        var user = Employee.builder()
+                .first_name(request.getFirstname())
+                .last_name(request.getLastname())
+                .username(request.getUsername())
+                .status(request.getStatus())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .role(Role.USER)
                 .build();
-        var savedUser = repository.save(user);
-        //logger.info("token geldimi: {}", user);
-        var jwtToken = jwtService.generateToken(user);
 
-        saveUserToken(savedUser, jwtToken);
-        return AuthenticationResponse.builder()
-                .token(jwtToken)
-                .build();
+            var savedUser = repository.save(user);
+            //logger.info("token geldimi: {}", user);
+            var jwtToken = jwtService.generateToken(user);
+
+            saveUserToken(savedUser, jwtToken);
+
+
+        return ResponseDTO.of(jwtToken, "Operation success");
     }
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
@@ -60,26 +65,33 @@ public class AuthenticationService {
                 )
         );
         var user = repository.findByEmail(request.getEmail())
-                .orElseThrow();
+                .orElseThrow(()->new UsernameNotFoundException("User not found"));
+
+        //get employee id by email
+        int emp_id = repository.getEmpIdByEmail(request.getEmail());
+
         var jwtToken = jwtService.generateToken((UserDetails) user);
-        UserDTO userDTO = new UserDTO().builder()
-                .id(user.getId())
-                .firstname(user.getFirstname())
-                .lastname(user.getLastname())
+        EmployeeDTO employeeDTO = new EmployeeDTO().builder()
+
+                .firstname(user.getFirst_name())
+                .lastname(user.getLast_name())
+                .username(user.getUsername())
                 .email(user.getEmail())
                 .role(user.getRole())
                 .build();
-        revokeAllUserTokens(user);
+
+        revokeAllUserTokens(emp_id);
+
         saveUserToken(user, jwtToken);
         return AuthenticationResponse.builder()
-                .user(userDTO)
+                .user(employeeDTO)
                 .token(jwtToken)
                 .build();
     }
 
-    private void saveUserToken(User user, String jwtToken) {
+    private void saveUserToken(Employee employee, String jwtToken) {
         var token = Token.builder()
-                .user(user)
+                .user(employee)
                 .token(jwtToken)
                 .tokenType(TokenType.BEARER)
                 .expired(false)
@@ -88,8 +100,8 @@ public class AuthenticationService {
         tokenRepository.save(token);
     }
 
-    private void revokeAllUserTokens(User user) {
-        var validUserTokens = tokenRepository.findAllValidTokenByUser(user.getId());
+    private void revokeAllUserTokens(Integer emp_id) {
+        var validUserTokens = tokenRepository.findAllValidTokenByUser(emp_id);
         if (validUserTokens.isEmpty())
             return;
         validUserTokens.forEach(token -> {

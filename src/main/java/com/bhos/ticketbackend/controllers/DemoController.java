@@ -2,7 +2,7 @@ package com.bhos.ticketbackend.controllers;
 
 import com.bhos.ticketbackend.auth.AuthenticationService;
 import com.bhos.ticketbackend.dto.ResponseDTO;
-import com.bhos.ticketbackend.dto.UserDTO;
+import com.bhos.ticketbackend.dto.EmployeeDTO;
 import com.bhos.ticketbackend.user.UserRowMapper;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -33,7 +33,7 @@ public class DemoController {
 
     @GetMapping("/users")
     public ResponseEntity<ResponseDTO> getUsers() {
-        List<UserDTO> listDTo = null;
+        List<EmployeeDTO> listDTo = null;
         try {
             String sql = "select u.id, u.firstname, u.lastname, u.email, u.role from user u";
             listDTo = jdbcTemplate.query(sql, new UserRowMapper());

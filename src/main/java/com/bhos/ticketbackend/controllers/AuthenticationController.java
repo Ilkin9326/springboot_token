@@ -1,5 +1,11 @@
-package com.bhos.ticketbackend.auth;
+package com.bhos.ticketbackend.controllers;
 
+import com.bhos.ticketbackend.auth.AuthenticationRequest;
+import com.bhos.ticketbackend.auth.AuthenticationResponse;
+import com.bhos.ticketbackend.auth.AuthenticationService;
+import com.bhos.ticketbackend.auth.RegisterRequest;
+import com.bhos.ticketbackend.dto.ResponseDTO;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,7 +20,7 @@ public class AuthenticationController {
     private final AuthenticationService service;
 
     @PostMapping("/register")
-    public ResponseEntity<AuthenticationResponse> register(
+    public ResponseEntity<ResponseDTO> register(@Valid
             @RequestBody RegisterRequest request
     ) {
         return ResponseEntity.ok(service.register(request));

@@ -1,6 +1,6 @@
 package com.bhos.ticketbackend.token;
 
-import com.bhos.ticketbackend.user.User;
+import com.bhos.ticketbackend.entity.Employee;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,12 +12,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@Table(name = "token")
 public class Token {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    public Integer id;
-
+    private Integer id;
     @Column(unique = true)
     public String token;
 
@@ -29,7 +29,7 @@ public class Token {
     public boolean expired;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
-    public User user;
+    @JoinColumn(name = "emp_id")
+    public Employee user;
 
 }

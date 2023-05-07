@@ -8,10 +8,11 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserDTO {
-    private Integer id;
+public class EmployeeDTO {
+    private Integer emp_id;
     private String firstname;
     private String lastname;
+    private String username;
     private String email;
 
     private Role role;
