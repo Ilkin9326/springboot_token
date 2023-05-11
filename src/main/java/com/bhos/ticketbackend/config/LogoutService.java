@@ -1,6 +1,6 @@
 package com.bhos.ticketbackend.config;
 
-import com.bhos.ticketbackend.token.TokenRepository;
+import com.bhos.ticketbackend.dao.TokenRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;

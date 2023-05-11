@@ -1,12 +1,15 @@
 package com.bhos.ticketbackend.dto;
 
-import com.bhos.ticketbackend.user.Role;
+import com.bhos.ticketbackend.entity.Role;
 import lombok.*;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Getter
 @Setter
 @Builder
-@NoArgsConstructor
+@RequiredArgsConstructor
 @AllArgsConstructor
 public class EmployeeDTO {
     private Integer emp_id;
@@ -15,6 +18,6 @@ public class EmployeeDTO {
     private String username;
     private String email;
 
-    private Role role;
+    private Set<Role> roles = new HashSet<>();
 
 }

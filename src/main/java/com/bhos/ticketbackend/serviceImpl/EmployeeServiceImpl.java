@@ -1,43 +1,41 @@
-package com.bhos.ticketbackend.auth;
+package com.bhos.ticketbackend.serviceImpl;
 
-
+import com.bhos.ticketbackend.dto.AuthenticationRequest;
+import com.bhos.ticketbackend.auth.AuthenticationResponse;
+import com.bhos.ticketbackend.auth.RegisterRequest;
 import com.bhos.ticketbackend.config.JwtService;
-import com.bhos.ticketbackend.dto.ResponseDTO;
-import com.bhos.ticketbackend.token.Token;
-import com.bhos.ticketbackend.token.TokenRepository;
-import com.bhos.ticketbackend.token.TokenType;
-import com.bhos.ticketbackend.entity.Employee;
 import com.bhos.ticketbackend.dto.EmployeeDTO;
-import com.bhos.ticketbackend.user.EmployeeRepository;
+import com.bhos.ticketbackend.dto.ResponseDTO;
+import com.bhos.ticketbackend.dto.RoleRequestDto;
+import com.bhos.ticketbackend.entity.Employee;
+import com.bhos.ticketbackend.exception.UserEmailUniqueException;
+import com.bhos.ticketbackend.service.IEmployeeService;
+import com.bhos.ticketbackend.token.Token;
+import com.bhos.ticketbackend.dao.TokenRepository;
+import com.bhos.ticketbackend.token.TokenType;
+import com.bhos.ticketbackend.dao.EmployeeRepository;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.NonUniqueResultException;
-import org.hibernate.exception.ConstraintViolationException;
-import org.postgresql.util.PSQLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.dao.DataAccessException;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 
 @Service
 @RequiredArgsConstructor
-public class AuthenticationService {
-
+public class EmployeeServiceImpl implements IEmployeeService {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
     private final EmployeeRepository repository;
-    private final TokenRepository tokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final TokenRepository tokenRepository;
     private final AuthenticationManager authenticationManager;
 
-
-    public ResponseDTO register(RegisterRequest request) {
+    @Override
+    public ResponseDTO signUp(RegisterRequest request) {
         var user = Employee.builder()
                 .first_name(request.getFirstname())
                 .last_name(request.getLastname())
@@ -47,17 +45,30 @@ public class AuthenticationService {
                 .password(passwordEncoder.encode(request.getPassword()))
                 .build();
 
+        //Check user exist in databvase by given email
+        Integer emp_id = repository.getEmpIdByEmail(request.getEmail());
+        String mesg = "(email)=("+request.getEmail()+") already exists.";
+
+        String jwtToken = "";
+        logger.info("gelen emp_id: {}", emp_id);
+
+        if(emp_id != null){
+            throw  new UserEmailUniqueException(mesg);
+        }else {
+
             var savedUser = repository.save(user);
             //logger.info("token geldimi: {}", user);
-            var jwtToken = jwtService.generateToken(user);
+            jwtToken = jwtService.generateToken(user);
 
             saveUserToken(savedUser, jwtToken);
+        }
 
 
         return ResponseDTO.of(jwtToken, "Operation success");
     }
 
-    public AuthenticationResponse authenticate(AuthenticationRequest request) {
+    @Override
+    public AuthenticationResponse signIn(AuthenticationRequest request) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getEmail(),
@@ -77,7 +88,7 @@ public class AuthenticationService {
                 .lastname(user.getLast_name())
                 .username(user.getUsername())
                 .email(user.getEmail())
-                .role(user.getRole())
+                .roles(user.getRoles())
                 .build();
 
         revokeAllUserTokens(emp_id);

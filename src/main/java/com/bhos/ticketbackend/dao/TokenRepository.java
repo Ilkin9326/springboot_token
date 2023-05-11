@@ -1,5 +1,6 @@
-package com.bhos.ticketbackend.token;
+package com.bhos.ticketbackend.dao;
 
+import com.bhos.ticketbackend.token.Token;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 

@@ -1,4 +1,4 @@
-package com.bhos.ticketbackend.user;
+package com.bhos.ticketbackend.dao;
 
 import com.bhos.ticketbackend.dto.EmployeeDTO;
 import com.bhos.ticketbackend.entity.Employee;
@@ -17,5 +17,5 @@ public interface EmployeeRepository extends JpaRepository<Employee, Integer> {
     List<EmployeeDTO> getAllUser();
 
     @Query(value = "select e.emp_id from employee e where e.email=?1", nativeQuery = true)
-    int getEmpIdByEmail(String email);
+    Integer getEmpIdByEmail(String email);
 }

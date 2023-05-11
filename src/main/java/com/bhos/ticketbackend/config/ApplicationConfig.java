@@ -1,6 +1,6 @@
 package com.bhos.ticketbackend.config;
 
-import com.bhos.ticketbackend.user.EmployeeRepository;
+import com.bhos.ticketbackend.dao.EmployeeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

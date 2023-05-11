@@ -1,8 +1,10 @@
 package com.bhos.ticketbackend.exception;
 
-import org.springframework.core.NestedExceptionUtils;
-import org.springframework.dao.DataIntegrityViolationException;
+import io.jsonwebtoken.ExpiredJwtException;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.*;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -11,11 +13,7 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.net.URI;
-import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
@@ -28,41 +26,57 @@ public class GlobalTicketExceptionHandler extends ResponseEntityExceptionHandler
                 .stream().map(FieldError::getDefaultMessage).collect(Collectors.toList());
 
         ProblemDetail problemDetail = ProblemDetail.forStatus(status);
-        problemDetail.setTitle("Bookmark Not Found");
+        problemDetail.setTitle("Validation");
         problemDetail.setType(URI.create(request.getContextPath()));
         problemDetail.setProperty("Error message", errors);
         return new ResponseEntity<>(problemDetail, status);
 
-
-        /*List<String> errors = ex.getBindingResult().getFieldErrors()
-                .stream().map(FieldError::getDefaultMessage).collect(Collectors.toList());
-
-        return new ResponseEntity<>(getErrorsMap(errors), new HttpHeaders(), HttpStatus.BAD_REQUEST);*/
-    }
-
-    private Map<String, List<String>> getErrorsMap(List<String> errors) {
-        Map<String, List<String>> errorResponse = new HashMap<>();
-        errorResponse.put("errors", errors);
-        return errorResponse;
-    }
-
-    @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<Object> conflict(DataIntegrityViolationException e) {
-        String message = NestedExceptionUtils.getMostSpecificCause(e).getMessage();
-        ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
-        problemDetail.setTitle("Bookmark Not Found");
-        problemDetail.setType(URI.create("ilkin/antaklasu"));
-        problemDetail.setProperty("Error message", message);
-        return new ResponseEntity<>(problemDetail, HttpStatus.BAD_REQUEST);
-
-        /*String message = NestedExceptionUtils.getMostSpecificCause(e).getMessage();
-        ApiResponseError responseError = new ApiResponseError(Arrays.asList(message), HttpStatus.BAD_REQUEST, LocalDateTime.now());
-        return new ResponseEntity<>(responseError, HttpStatus.BAD_REQUEST);*/
     }
 
 
+    @ExceptionHandler(UserEmailUniqueException.class)
+    public ProblemDetail handleEmailUniqueProblem(UserEmailUniqueException exception, HttpServletRequest httpServletReques){
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, exception.getMessage());
+        problemDetail.setTitle("Could not execute statement");
+        problemDetail.setType(URI.create(String.valueOf(httpServletReques.getRequestURL())));
 
+        return  problemDetail;
+    }
 
+    @ExceptionHandler(ExpiredJwtException.class)
+    public ProblemDetail handleExpiredJwtException(ExpiredJwtException ex, HttpServletRequest httpServletRequest){
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
+        problemDetail.setTitle("JWT expired ");
+        problemDetail.setType(URI.create(String.valueOf(httpServletRequest.getRequestURL())));
 
+        return  problemDetail;
+    }
+
+    @ExceptionHandler(NullPointerException.class)
+    public ProblemDetail handleNullPointerException(NullPointerException ex, HttpServletRequest httpServletRequest){
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
+        problemDetail.setTitle("Returning Null");
+        problemDetail.setType(URI.create(String.valueOf(httpServletRequest.getRequestURL())));
+
+        return  problemDetail;
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ProblemDetail handleAuthenticationException(AuthenticationException ex, HttpServletRequest httpServletRequest){
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
+        problemDetail.setTitle("Authentication Exception");
+        problemDetail.setType(URI.create(String.valueOf(httpServletRequest.getRequestURL())));
+
+        return  problemDetail;
+    }
+
+    @ExceptionHandler(UsernameNotFoundException.class)
+    public ProblemDetail handleUsernameNotFoundException(UsernameNotFoundException ex, HttpServletRequest httpServletRequest){
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
+        problemDetail.setTitle("Username Not Found Exception");
+        problemDetail.setType(URI.create(String.valueOf(httpServletRequest.getRequestURL())));
+
+        return  problemDetail;
+    }
 
 }

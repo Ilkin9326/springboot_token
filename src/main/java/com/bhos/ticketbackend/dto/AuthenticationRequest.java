@@ -1,4 +1,4 @@
-package com.bhos.ticketbackend.auth;
+package com.bhos.ticketbackend.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
