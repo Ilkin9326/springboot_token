@@ -3,6 +3,7 @@ package com.bhos.ticketbackend.dto;
 import com.bhos.ticketbackend.entity.Role;
 import lombok.*;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -18,6 +19,6 @@ public class EmployeeDTO {
     private String username;
     private String email;
 
-    private Set<Role> roles = new HashSet<>();
+    private Collection<Role> roles;
 
 }

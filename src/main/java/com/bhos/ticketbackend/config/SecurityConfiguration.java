@@ -1,5 +1,6 @@
 package com.bhos.ticketbackend.config;
 
+import com.bhos.ticketbackend.exception.CustomAccessDeniedHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -30,7 +31,7 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests((authorizationManagerRequest) -> authorizationManagerRequest
                             .requestMatchers("/api/v1/auth/**").permitAll()
                             .requestMatchers("/api/v1/demo-controller/users").hasAuthority("ADMIN")
-                            .requestMatchers("/api/v1/demo-controller/role").hasAuthority("ADMIN")
+                            .requestMatchers("/api/v1/demo-controller/role/**").hasAuthority("ADMIN")
                             .requestMatchers("/api/v1/demo-controller/users").hasAuthority("ADMIN")
                             .requestMatchers("/api/v1/demo-controller/user/{id}").hasAnyAuthority("USER", "ADMIN")
                             .anyRequest().authenticated()
@@ -39,6 +40,7 @@ public class SecurityConfiguration {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint)
+                .accessDeniedHandler(new CustomAccessDeniedHandler())
                 .and()
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)

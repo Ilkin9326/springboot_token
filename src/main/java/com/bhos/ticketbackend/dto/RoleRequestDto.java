@@ -12,12 +12,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class RoleRequestDto {
-    @NotBlank(message = "Invalid title_az: title_az field can not be empty")
-    @Size(min = 3, max = 70, message = "Invalid title_az: Must be of 3 - 70 characters")
-    private String title_az;
+    @NotBlank(message = "Invalid title: role title field can not be empty")
+    @Size(min = 3, max = 70, message = "Invalid title: Must be of 3 - 70 characters")
+    private String title;
 
-    private String title_en;
+    private String description;
 
-
-    private String title_ru;
 }

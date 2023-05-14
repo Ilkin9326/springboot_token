@@ -7,6 +7,7 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 
 import java.security.Key;
+import java.time.Instant;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -76,4 +77,18 @@ public class JwtService {
         byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
         return Keys.hmacShaKeyFor(keyBytes);
     }
+
+
+    /*public String refreshToken(UserDetails customUserDetail, String token) {
+
+        // TODO: 4/4/23  you have to implement it by yourself to support refresh token
+        Instant currentTime = Instant.now();
+        return Jwts.builder()
+                .setSubject(customUserDetail.getUsername())
+                .setIssuedAt(Date.from(currentTime))
+                .setExpiration(Date.from(currentTime.plusSeconds(extractExpiration(token))))
+                .signWith(getSignInKey(), SignatureAlgorithm.HS256)
+                .compact();
+
+    }*/
 }

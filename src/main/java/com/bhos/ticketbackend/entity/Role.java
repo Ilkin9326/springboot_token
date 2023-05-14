@@ -4,28 +4,25 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serializable;
+
 @Getter
 @Setter
 @Entity
 @Table(name = "roles")
-public class Role {
+public class Role implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer role_id;
 
     @Column(nullable = false, length = 50, unique = true)
-    private String title_az;
+    private String title;
 
-    @Column(nullable = false, length = 50, unique = true)
-    private String title_en;
-
-    @Column(nullable = false, length = 50, unique = true)
-    private String title_ru;
 
     public Role() { }
 
-    public Role(String name) {
-        this.title_az = name;
+    public Role(String title) {
+        this.title = title;
     }
 
     public Role(Integer id) {
@@ -35,6 +32,6 @@ public class Role {
 
     @Override
     public String toString() {
-        return this.title_en;
+        return this.title;
     }
 }

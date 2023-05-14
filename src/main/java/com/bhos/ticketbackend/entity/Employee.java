@@ -38,14 +38,14 @@ public class Employee implements UserDetails {
             joinColumns = @JoinColumn(name = "emp_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
-    private Set<Role> roles = new HashSet<>();
+    private Collection<Role> roles;
 
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         List<SimpleGrantedAuthority> authorities = new ArrayList<>();
         for (Role role : roles) {
-            authorities.add(new SimpleGrantedAuthority(role.getTitle_en()));
+            authorities.add(new SimpleGrantedAuthority(role.getTitle()));
         }
         return authorities;
     }

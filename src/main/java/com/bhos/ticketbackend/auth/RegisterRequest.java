@@ -1,11 +1,12 @@
 package com.bhos.ticketbackend.auth;
 
-
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Data
 @Builder
@@ -36,4 +37,8 @@ public class RegisterRequest {
 
 
     private String password;
+
+    @NotNull(message = "Please enter a valid Roles")
+    @NotEmpty(message = "Role field can't be empty")
+    private List<String> roles;
 }

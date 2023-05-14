@@ -1,5 +1,6 @@
 package com.bhos.ticketbackend.exception;
 
+import com.bhos.ticketbackend.dto.ResponseErrorTemplate;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.*;
@@ -43,6 +44,15 @@ public class GlobalTicketExceptionHandler extends ResponseEntityExceptionHandler
         return  problemDetail;
     }
 
+    @ExceptionHandler(RoleUniqueException.class)
+    public ProblemDetail handleRoleUniqueException(RoleUniqueException exception, HttpServletRequest httpServletReques){
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, exception.getMessage());
+        problemDetail.setTitle("Could not execute statement");
+        problemDetail.setType(URI.create(String.valueOf(httpServletReques.getRequestURL())));
+
+        return  problemDetail;
+    }
+
     @ExceptionHandler(ExpiredJwtException.class)
     public ProblemDetail handleExpiredJwtException(ExpiredJwtException ex, HttpServletRequest httpServletRequest){
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
@@ -78,5 +88,16 @@ public class GlobalTicketExceptionHandler extends ResponseEntityExceptionHandler
 
         return  problemDetail;
     }
+
+    @ExceptionHandler(CustomMessageException.class)
+    public ProblemDetail handleCustomMessageException(CustomMessageException ex, HttpServletRequest httpServletRequest){
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
+        problemDetail.setTitle("Custom exception");
+        problemDetail.setType(URI.create(String.valueOf(httpServletRequest.getRequestURL())));
+
+        return  problemDetail;
+    }
+
+
 
 }

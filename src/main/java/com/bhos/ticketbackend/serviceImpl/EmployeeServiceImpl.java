@@ -1,5 +1,6 @@
 package com.bhos.ticketbackend.serviceImpl;
 
+import com.bhos.ticketbackend.dao.RoleRepository;
 import com.bhos.ticketbackend.dto.AuthenticationRequest;
 import com.bhos.ticketbackend.auth.AuthenticationResponse;
 import com.bhos.ticketbackend.auth.RegisterRequest;
@@ -8,6 +9,8 @@ import com.bhos.ticketbackend.dto.EmployeeDTO;
 import com.bhos.ticketbackend.dto.ResponseDTO;
 import com.bhos.ticketbackend.dto.RoleRequestDto;
 import com.bhos.ticketbackend.entity.Employee;
+import com.bhos.ticketbackend.entity.Role;
+import com.bhos.ticketbackend.exception.CustomMessageException;
 import com.bhos.ticketbackend.exception.UserEmailUniqueException;
 import com.bhos.ticketbackend.service.IEmployeeService;
 import com.bhos.ticketbackend.token.Token;
@@ -17,12 +20,17 @@ import com.bhos.ticketbackend.dao.EmployeeRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
+
+import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -33,9 +41,12 @@ public class EmployeeServiceImpl implements IEmployeeService {
     private final JwtService jwtService;
     private final TokenRepository tokenRepository;
     private final AuthenticationManager authenticationManager;
+    private final RoleRepository roleRepository;
 
     @Override
     public ResponseDTO signUp(RegisterRequest request) {
+        this.userRequestValidation(request);
+        List<Role> reqRoles = roleRepository.findAllByTitleIn(request.getRoles());
         var user = Employee.builder()
                 .first_name(request.getFirstname())
                 .last_name(request.getLastname())
@@ -43,18 +54,18 @@ public class EmployeeServiceImpl implements IEmployeeService {
                 .status(request.getStatus())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
+                .roles(reqRoles)
                 .build();
 
-        //Check user exist in databvase by given email
+        //check whether the user exists in the database by email
         Integer emp_id = repository.getEmpIdByEmail(request.getEmail());
-        String mesg = "(email)=("+request.getEmail()+") already exists.";
+        String mesg = "(email)=(" + request.getEmail() + ") already exists.";
 
         String jwtToken = "";
-        logger.info("gelen emp_id: {}", emp_id);
 
-        if(emp_id != null){
-            throw  new UserEmailUniqueException(mesg);
-        }else {
+        if (emp_id != null) {
+            throw new UserEmailUniqueException(mesg);
+        } else {
 
             var savedUser = repository.save(user);
             //logger.info("token geldimi: {}", user);
@@ -76,7 +87,7 @@ public class EmployeeServiceImpl implements IEmployeeService {
                 )
         );
         var user = repository.findByEmail(request.getEmail())
-                .orElseThrow(()->new UsernameNotFoundException("User not found"));
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
         //get employee id by email
         int emp_id = repository.getEmpIdByEmail(request.getEmail());
@@ -120,5 +131,25 @@ public class EmployeeServiceImpl implements IEmployeeService {
             token.setRevoked(true);
         });
         tokenRepository.saveAll(validUserTokens);
+    }
+
+    private void userRequestValidation(RegisterRequest userRequest) {
+
+        // TODO: 3/4/23 password must be not null or blank
+        if(ObjectUtils.isEmpty(userRequest.getPassword())) {
+            throw new CustomMessageException("Password can't be blank or null",
+                    String.valueOf(HttpStatus.BAD_REQUEST));
+        }
+
+        // TODO: 3/4/23 check role valid request
+        List<String> roles = roleRepository.findAll().stream().map(Role::getTitle).toList();
+        for (var role : userRequest.getRoles()) {
+            if (!roles.contains(role)) {
+                throw new CustomMessageException("Role is invalid request.",
+                        String.valueOf(HttpStatus.BAD_REQUEST));
+            }
+
+        }
+
     }
 }
